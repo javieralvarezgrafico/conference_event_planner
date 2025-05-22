@@ -3,14 +3,20 @@ import "./ConferenceEvent.css";
 import TotalCost from "./TotalCost";
 import { useSelector, useDispatch } from "react-redux";
 import { incrementQuantity, decrementQuantity } from "./venueSlice";
+import { incrementAvQuantity, decrementAvQuantity } from "./avSlice";
 
 const ConferenceEvent = () => {
   const [showItems, setShowItems] = useState(false);
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const venueItems = useSelector((state) => state.venue);
+  const avItems = useSelector((state) => state.av);
   const dispatch = useDispatch();
+
   const remainingAuditoriumQuantity =
-    3 - venueItems.find((item) => item.name === "Auditorium Hall (Capacity:200)").quantity;
+    3 -
+    venueItems.find(
+      (item) => item.name === "Auditorium Hall (Capacity:200)"
+    ).quantity;
 
   const handleToggleItems = () => {
     console.log("handleToggleItems called");
@@ -33,9 +39,13 @@ const ConferenceEvent = () => {
     }
   };
 
-  const handleIncrementAvQuantity = (index) => {};
+  const handleIncrementAvQuantity = (index) => {
+    dispatch(incrementAvQuantity(index));
+  };
 
-  const handleDecrementAvQuantity = (index) => {};
+  const handleDecrementAvQuantity = (index) => {
+    dispatch(decrementAvQuantity(index));
+  };
 
   const handleMealSelection = (index) => {};
 
@@ -53,11 +63,16 @@ const ConferenceEvent = () => {
       venueItems.forEach((item) => {
         totalCost += item.cost * item.quantity;
       });
+    } else if (section === "av") {
+      avItems.forEach((item) => {
+        totalCost += item.cost * item.quantity;
+      });
     }
     return totalCost;
   };
 
   const venueTotalCost = calculateTotalCost("venue");
+  const avTotalCost = calculateTotalCost("av");
 
   const navigateToProducts = (idType) => {
     if (idType == "#venue" || idType == "#addons" || idType == "#meals") {
@@ -73,11 +88,20 @@ const ConferenceEvent = () => {
         <div className="company_logo">Conference Expense Planner</div>
         <div className="left_navbar">
           <div className="nav_links">
-            <a href="#venue" onClick={() => navigateToProducts("#venue")}>Venue</a>
-            <a href="#addons" onClick={() => navigateToProducts("#addons")}>Add-ons</a>
-            <a href="#meals" onClick={() => navigateToProducts("#meals")}>Meals</a>
+            <a href="#venue" onClick={() => navigateToProducts("#venue")}>
+              Venue
+            </a>
+            <a href="#addons" onClick={() => navigateToProducts("#addons")}>
+              Add-ons
+            </a>
+            <a href="#meals" onClick={() => navigateToProducts("#meals")}>
+              Meals
+            </a>
           </div>
-          <button className="details_button" onClick={() => setShowItems(!showItems)}>
+          <button
+            className="details_button"
+            onClick={() => setShowItems(!showItems)}
+          >
             Show Details
           </button>
         </div>
@@ -100,7 +124,8 @@ const ConferenceEvent = () => {
                     <div className="text">{item.name}</div>
                     <div>${item.cost}</div>
                     <div className="button_container">
-                      {venueItems[index].name === "Auditorium Hall (Capacity:200)" ? (
+                      {venueItems[index].name ===
+                      "Auditorium Hall (Capacity:200)" ? (
                         <>
                           <button
                             className={
@@ -169,8 +194,33 @@ const ConferenceEvent = () => {
               <div className="text">
                 <h1>Add-ons Selection</h1>
               </div>
-              <div className="addons_selection"></div>
-              <div className="total_cost">Total Cost:</div>
+              <div className="addons_selection">
+                {avItems.map((item, index) => (
+                  <div className="av_data venue_main" key={index}>
+                    <div className="img">
+                      <img src={item.img} alt={item.name} />
+                    </div>
+                    <div className="text"> {item.name} </div>
+                    <div> ${item.cost} </div>
+                    <div className="addons_btn">
+                      <button
+                        className="btn-warning"
+                        onClick={() => handleDecrementAvQuantity(index)}
+                      >
+                        &ndash;
+                      </button>
+                      <span className="quantity-value">{item.quantity}</span>
+                      <button
+                        className="btn-success"
+                        onClick={() => handleIncrementAvQuantity(index)}
+                      >
+                        &#43;
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="total_cost">Total Cost: ${avTotalCost}</div>
             </div>
 
             {/* Meals Section */}
